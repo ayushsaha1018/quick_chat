@@ -9,10 +9,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { CHAT_GROUP_USERS } from "@/lib/apiAuthRoutes";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { CustomSession } from "@/app/api/auth/[...nextauth]/options";
 
 export default function ChatUserDialog({
   open,
@@ -23,7 +25,10 @@ export default function ChatUserDialog({
   setOpen: Dispatch<SetStateAction<boolean>>;
   group: GroupChatType;
 }) {
+  const { data: session } = useSession() as { data: CustomSession | null };
   const params = useParams();
+  const searchParams = useSearchParams();
+  const isCommunity = searchParams.get("from") === "communities";
   const [state, setState] = useState({
     name: "",
     passcode: "",
@@ -37,26 +42,51 @@ export default function ChatUserDialog({
         setOpen(false);
       }
     }
-  }, []);
+    
+    // If coming from communities page, close the dialog automatically
+    if (isCommunity && session?.user) {
+      setOpen(false);
+    }
+  }, [isCommunity, params, session, setOpen]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const localData = localStorage.getItem(params["id"] as string);
     if (!localData) {
+      const token = session?.user?.token || "";
+      
       try {
-        const { data } = await axios.post(CHAT_GROUP_USERS, {
-          name: state.name,
-          group_id: params["id"] as string,
-        });
+        const { data } = await axios.post(
+          CHAT_GROUP_USERS,
+          {
+            name: state.name || session?.user?.name || "Anonymous User",
+            groupId: params["id"] as string,
+            userId: session?.user?.id || "0",
+          },
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
         localStorage.setItem(
           params["id"] as string,
           JSON.stringify(data?.data)
         );
       } catch (error) {
         toast.error("Something went wrong.please try again!");
+        return;
       }
     }
-    if (group.passcode != state.passcode) {
+    
+    // Skip passcode check if coming from communities page
+    if (isCommunity) {
+      setOpen(false);
+      return;
+    }
+    
+    // Only verify passcode for non-community chats
+    if (group.passcode && group.passcode !== state.passcode) {
       toast.error("Please enter correct passcode!");
     } else {
       setOpen(false);
@@ -80,13 +110,15 @@ export default function ChatUserDialog({
               onChange={(e) => setState({ ...state, name: e.target.value })}
             />
           </div>
-          <div className="mt-2">
-            <Input
-              placeholder="Enter your passcode"
-              value={state.passcode}
-              onChange={(e) => setState({ ...state, passcode: e.target.value })}
-            />
-          </div>
+          {!isCommunity && (
+            <div className="mt-2">
+              <Input
+                placeholder="Enter your passcode"
+                value={state.passcode}
+                onChange={(e) => setState({ ...state, passcode: e.target.value })}
+              />
+            </div>
+          )}
           <div className="mt-2">
             <Button className="w-full">Submit</Button>
           </div>
@@ -95,3 +127,4 @@ export default function ChatUserDialog({
     </Dialog>
   );
 }
+

@@ -3,6 +3,7 @@ type GroupChatType = {
   user_id: number;
   title: string;
   created_at: string;
+  passcode?: string;
 };
 
 type GroupChatUserType = {

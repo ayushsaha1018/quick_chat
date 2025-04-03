@@ -21,7 +21,7 @@ export default function GroupChatCard({
   const router = useRouter();
 
   const handleJoin = () => {
-    router.push(`/chat/${group.id}`);
+    router.push(`/chat/${group.id}?from=communities`);
   };
 
   return (

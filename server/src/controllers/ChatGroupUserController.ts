@@ -28,7 +28,9 @@ class ChatGroupUserController {
   static async store(req: Request, res: Response) {
     try {
       const body: GroupUserType = req.body;
-      
+
+      console.log(body);
+
       // Check if user is already a member
       const existingMember = await prisma.groupUsers.findFirst({
         where: {
@@ -38,7 +40,9 @@ class ChatGroupUserController {
       });
 
       if (existingMember) {
-        return res.status(400).json({ message: "User is already a member of this group" });
+        return res
+          .status(400)
+          .json({ message: "User is already a member of this group" });
       }
 
       const user = await prisma.groupUsers.create({
@@ -46,7 +50,7 @@ class ChatGroupUserController {
           group_id: body.groupId,
           name: body.name,
           role: "MEMBER",
-          status: "OFFLINE"
+          status: "OFFLINE",
         },
       });
 
