@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import ServiceLayout from "@/components/layouts/ServiceLayout";
@@ -89,7 +91,9 @@ export default function ChatPage() {
             >
               <div
                 className={`flex items-start space-x-2 max-w-[80%] ${
-                  message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
+                  message.role === "user"
+                    ? "flex-row-reverse space-x-reverse"
+                    : ""
                 }`}
               >
                 <div
@@ -154,4 +158,4 @@ export default function ChatPage() {
       </div>
     </ServiceLayout>
   );
-} 
+}
