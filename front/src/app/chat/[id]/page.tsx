@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import { CHAT_GROUP_USERS } from "@/lib/apiAuthRoutes";
 
 export default function Chat({ params }: { params: { id: string } }) {
   const { data: session } = useSession();
@@ -15,7 +16,9 @@ export default function Chat({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [chatGroup, setChatGroup] = useState<GroupChatType | null>(null);
-  const [chatGroupUsers, setChatGroupUsers] = useState<Array<GroupChatUserType>>([]);
+  const [chatGroupUsers, setChatGroupUsers] = useState<
+    Array<GroupChatUserType>
+  >([]);
   const [chats, setChats] = useState<Array<MessageType>>([]);
 
   useEffect(() => {
@@ -32,10 +35,11 @@ export default function Chat({ params }: { params: { id: string } }) {
         }
 
         // First try to join the group
-        const joinResponse = await fetch("/api/chat-group-user", {
+        const joinResponse = await fetch(`${CHAT_GROUP_USERS}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `${session.user.token}`,
           },
           body: JSON.stringify({
             groupId: params.id,
@@ -60,8 +64,8 @@ export default function Chat({ params }: { params: { id: string } }) {
         }
 
         // Fetch users and chats
-        const users = await fetchChatGroupUsers(params.id);
-        const messages = await fetchChats(params.id);
+        const users = await fetchChatGroupUsers(params.id, session.user.token);
+        const messages = await fetchChats(params.id, session.user.token);
 
         setChatGroup(group);
         setChatGroupUsers(users);
@@ -70,7 +74,8 @@ export default function Chat({ params }: { params: { id: string } }) {
         console.error("Error joining group:", error);
         toast({
           title: "Error",
-          description: error instanceof Error ? error.message : "Failed to join group",
+          description:
+            error instanceof Error ? error.message : "Failed to join group",
           variant: "destructive",
         });
         router.push("/communities");
@@ -95,7 +100,9 @@ export default function Chat({ params }: { params: { id: string } }) {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Loading...</h1>
-          <p className="text-gray-600">Please wait while we set up your chat.</p>
+          <p className="text-gray-600">
+            Please wait while we set up your chat.
+          </p>
         </div>
       </div>
     );

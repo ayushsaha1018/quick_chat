@@ -39,9 +39,10 @@ class ChatGroupController {
   static async show(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      
+
       // Validate UUID format
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(id)) {
         return res.status(400).json({ message: "Invalid group ID format" });
       }
@@ -67,6 +68,7 @@ class ChatGroupController {
   static async store(req: Request, res: Response) {
     try {
       const body = req.body;
+      const user = req.user;
       if (!body?.title) {
         return res.status(400).json({ message: "Title is required" });
       }
@@ -74,7 +76,7 @@ class ChatGroupController {
       const group = await prisma.chatGroup.create({
         data: {
           title: body.title,
-          user_id: body.user_id,
+          user_id: user.id,
         },
       });
 
@@ -92,7 +94,8 @@ class ChatGroupController {
       const body = req.body;
 
       // Validate UUID format
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(id)) {
         return res.status(400).json({ message: "Invalid group ID format" });
       }
@@ -123,7 +126,8 @@ class ChatGroupController {
       const { id } = req.params;
 
       // Validate UUID format
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(id)) {
         return res.status(400).json({ message: "Invalid group ID format" });
       }

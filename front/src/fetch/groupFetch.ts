@@ -61,9 +61,12 @@ export async function fetchChatGroup(id: string, token: string) {
   return null;
 }
 
-export async function fetchChatGroupUsers(id: string) {
+export async function fetchChatGroupUsers(id: string, token: string) {
   const res = await fetch(`${CHAT_GROUP_USERS}?group_id=${id}`, {
     cache: "no-cache",
+    headers: {
+      Authorization: token,
+    },
   });
 
   if (!res.ok) {
