@@ -26,9 +26,10 @@ export async function fetchAllPublicGroups() {
   try {
     const res = await fetch(`${CHAT_GROUP}/public`, {
       next: {
-        revalidate: 60 * 60,
+        revalidate: 0,
         tags: ["communities"],
       },
+      cache: "no-cache",
     });
 
     if (!res.ok) {

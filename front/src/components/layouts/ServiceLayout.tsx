@@ -34,7 +34,7 @@ export default function ServiceLayout({ children, session }: ServiceLayoutProps)
 
             {/* Chat with AI Link */}
             <Link 
-              href="/chat" 
+              href="/chat-with-ai" 
               className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-200 transition-colors"
             >
               <MessageSquare className="w-5 h-5 text-gray-600" />
